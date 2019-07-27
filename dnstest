@@ -1,0 +1,12 @@
+#! /bin/bash
+
+#
+# test the response time of a DNS server
+#
+
+while true; do 
+	RANDDNS=$(cat /dev/urandom | tr -dc 'a-z' | fold -w 8 | head -n 1);
+	echo "$RANDDNS"
+	dig www.${RANDDNS}.com | grep time; 
+	sleep 1; 
+done
