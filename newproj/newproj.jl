@@ -1,7 +1,8 @@
 #! /usr/bin/env julia
 
 using Pkg
-Pkg.activate(dirname(@__FILE__))
+Pkg.activate(dirname(@__FILE__), io=devnull)
+Pkg.instantiate()
 using PkgTemplates
 
 function newproj(name)
@@ -10,8 +11,7 @@ function newproj(name)
         Git(; manifest=false, ssh=true),
         Documenter{GitHubActions}(),
         TagBot(),
-        GitHubActions(;linux=true, osx=true),
-        Develop()
+        GitHubActions(;linux=true, osx=true)
     ],
 )
 
