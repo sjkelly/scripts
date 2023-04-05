@@ -1,0 +1,50 @@
+#!/usr/bin/env julia
+
+using Pkg
+Pkg.activate(dirname(@__FILE__), io=devnull)
+Pkg.instantiate()
+
+using Plots
+using Dates
+using Printf
+
+const url = "example.com"
+const ping_interval = 5.0 # in seconds
+const ping_count = 1      # number of pings per cycle
+
+results = Tuple{DateTime, Bool}[]
+
+function ping_website(url::String)
+    output = IOBuffer()
+    cmd = `ping -c $ping_count $url`
+    process = run(pipeline(cmd, stdout=output, stderr=output), wait=false)
+
+    # Wait for the process to finish and read the output
+    wait(process)
+    result = String(take!(output))
+
+    # Check for success or failure
+    success = occursin("1 packets transmitted, 1 received", result)
+    return success
+end
+
+function plot_results(results)
+    times = [res[1] for res in results]
+    success = [res[2] for res in results]
+    plot(times, success, xlabel="Time", ylabel="Pass/Fail (1/0)", title="Ping Results", legend=false)
+    savefig("ping_results.png")
+end
+
+function on_shutdown()
+    plot_results(results)
+    println("Results saved in ping_results.png")
+end
+
+atexit(on_shutdown)
+
+while true
+    result = ping_website(url)
+    @printf("Ping %s at %s\n", result ? "succeeded" : "failed", Dates.now())
+    push!(results, (Dates.now(), result))
+    sleep(ping_interval)
+end
