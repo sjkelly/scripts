@@ -1,25 +1,39 @@
-#! /usr/bin/env julia
+#! /usr/bin/env julia --compile=min 
 
 using Pkg
-Pkg.activate(dirname(@__FILE__), io=devnull)
+Pkg.activate(dirname(@__FILE__); io = devnull)
 Pkg.instantiate()
 using PkgTemplates
 
-function newproj(name)
+function newproj(projname, orgname = "sjkelly")
     tpl = Template(;
-    plugins=[
-        Git(; manifest=false, ssh=true),
-        Documenter{GitHubActions}(),
-        TagBot(),
-        GitHubActions(;linux=true, osx=true)
-    ],
-)
+        user = orgname,
+        plugins = [
+            Git(; manifest = false, ssh = true),
+            Documenter{GitHubActions}(),
+            TagBot(),
+            CompatHelper(),
+            Dependabot(),
+            Codecov(),
+            Coveralls(),
+            GitHubActions(; linux = true, osx = true),
+            Tests(;
+                project = true,
+                aqua = true,
+                aqua_kwargs = NamedTuple(),
+                jet = true
+            ),
+            Formatter(;
+                file = "./.JuliaFormatter.toml"
+            )
+        ]
+    )
 
-    tpl(name)
+    return tpl(projname)
 end
 
 if !isempty(ARGS)
     newproj(ARGS[1])
 else
-    println("Usage: newproj <project name>")
+    println("Usage: newproj <project name> <orgname>")
 end
