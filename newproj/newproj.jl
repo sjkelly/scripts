@@ -32,7 +32,9 @@ function newproj(projname, orgname = "sjkelly")
     return tpl(projname)
 end
 
-if !isempty(ARGS)
+if length(ARGS) == 2
+    newproj(ARGS[1], ARG[2])
+elseif length(ARGS) == 1
     newproj(ARGS[1])
 else
     println("Usage: newproj <project name> <orgname>")
